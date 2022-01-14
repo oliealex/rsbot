@@ -38,7 +38,7 @@ function readCharacterMovement(bot) {
 
 // Generic game functions
 
-function rotateMap() {
+function rotateMap(south) {
     sleep(1)
     let x = 1414;
     let y = 41;
@@ -50,12 +50,16 @@ function rotateMap() {
     let colorFound = findColor(x,y,width,height,mapColors);
     screen_x = colorFound.random_x + x
     screen_y = colorFound.random_y + y
-    robot.moveMouse(screen_x, screen_y)
-    robot.mouseClick()
 
-    robot.keyToggle("up","down");
-    sleep(1);
-    robot.keyToggle("up", "up");
+    if (south) {
+        robot.moveMouse(screen_x, screen_y)
+        robot.mouseClick("right")
+        robot.moveMouse(screen_x,screen_y+42)
+    } else {
+        robot.moveMouse(screen_x, screen_y)
+        robot.mouseClick()
+    }
+    
 }
 
 function characterMovement(x, y, button, seconds, key, toggle, gameCallback) {
