@@ -1,0 +1,29 @@
+{
+    "bot": "smelting_cannonballs",
+    "mouseMovements": [
+        {
+            "x": 758,
+            "y": 653,
+            "button": "",
+            "waitTime": 0
+        },
+        {
+            "x": 903,
+            "y": 380,
+            "button": "",
+            "waitTime": "3.1"
+        },
+        {
+            "x": 1200,
+            "y": 729,
+            "button": "",
+            "waitTime": "2.0"
+        },
+        {
+            "x": 941,
+            "y": 592,
+            "button": "",
+            "waitTime": "255.0"
+        }
+    ]
+}

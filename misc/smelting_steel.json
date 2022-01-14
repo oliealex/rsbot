@@ -1,0 +1,29 @@
+{
+    "bot": "smelting_steel",
+    "mouseMovements": [
+        {
+            "x": 951,
+            "y": 582,
+            "button": "",
+            "waitTime": 0
+        },
+        {
+            "x": 1204,
+            "y": 746,
+            "button": "",
+            "waitTime": "2.6"
+        },
+        {
+            "x": 960,
+            "y": 582,
+            "button": "right",
+            "waitTime": "69.0"
+        },
+        {
+            "x": 953,
+            "y": 624,
+            "button": "",
+            "waitTime": "0.7"
+        }
+    ]
+}
