@@ -16,16 +16,52 @@ function getRandomInt(start, end) {
 
 function findColor(x,y,width,height, colors) {
     let img = robot.screen.capture(x, y, width, height);
-    
-    for (let i = 0; i < width; i++) {
-        for(let j = 0; j < height; j++) {
-            let color = img.colorAt(i, j)
-            if (colors.includes(color))
-                return {"random_x": i,"random_y": j,"state": true};
+    let test = width * height
+    let random_x = 0
+    let random_y = 0
+    let color = []
+
+    for (let i = 0; i < test; i++) {
+        random_x = getRandomInt(0, width-1);
+        random_y = getRandomInt(0, height-1);
+        color = img.colorAt(random_x, random_y)
+        if (colors.includes(color)) {
+            return {"random_x": random_x + x,"random_y": random_y + y,"state": true};
         }
     }
     
     return {"random_x": 0, "random_y": 0,"state": false}
+}
+
+function findTarget(target) {
+    let itemData = readColorData()
+    let startX = 0
+    let startY = 627
+    let areaX, areaY = 100
+    let found = false
+
+    console.log(itemData[target].colors)
+
+    while(!found) {
+        colorFound = findColor(startX,startY,areaX,areaY, itemData[target].colors)
+
+        //console.log("StartX: " + startX + ", StartY: " + startY)
+        if(colorFound.state) {
+            found = true
+            console.log("Color Found?: " + colorFound.state)
+            robot.moveMouse(colorFound.random_x, colorFound.random_y)
+            robot.mouseClick()
+        } else {
+            if (startX + 100 >= 1920) {
+                startX = 263
+                startY -= 100
+            } else if (startY < 5) {
+                found = true
+            } else {
+                startX += 100
+            }
+        }
+    }
 }
 
 
@@ -35,6 +71,13 @@ function readCharacterMovement(bot) {
     
     return data
 } 
+
+function readColorData() {
+    let path= "./data/color_models.json"
+    let data = JSON.parse(fs.readFileSync(path), 'utf-8')
+
+    return data
+}
 
 // Generic game functions
 
@@ -64,7 +107,7 @@ function rotateMap(south) {
 
 function characterMovement(x, y, button, seconds, key, toggle, gameCallback) {
 
-    sleep(seconds)
+    sleep(seconds + 1)
 
     if (key.length > 0) {
         if(toggle.length > 0) {
@@ -142,5 +185,7 @@ module.exports = {
     openRS,
     openTeleportButton,
     readCharacterMovement,
-    rotateMap
+    rotateMap,
+    readColorData,
+    findTarget
   };

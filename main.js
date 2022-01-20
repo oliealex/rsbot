@@ -2,64 +2,87 @@
 // bot controller
 // ===========
 
-const prompt = require('prompt')
-const botter = require('./src/bots/bot.js')
+const prompt = require('prompt');
+const fs = require('fs');
+const bot = require('./src/bots/bot.js');
+const helper = require('./src/utility/helper.js');
+const robot = require('robotjs');
+const combatBot = require('./src/bots/combat_bot.js');
+
+const fsPromises = fs.promises;
+
+async function readAvailableBots(path) {
+    const botFolder = path;
+    let files = await fsPromises.readdir(botFolder);
+
+    let tmpIndex = files.indexOf("template");
+    files.splice(tmpIndex,1);
 
 
-let schema = {
-    properties: {
-        bot: {
-            pattern: /^[a-zA-Z\s\-]+$/,
-            message: 'Must choose a valid bot',
-            required: true
-        },
-    }
-};
+    return files;
+}
 
+function displayCategories(categories) {
+    console.log("========= Bots menu =========");
+    console.log("INFO: Write the full name of the category\n");
 
-const bots = [
-    {"name": "Litium bot", "description": "Farming gold by mining and banking litium ores", "location": "Dwarven mines"},
-    {"name": "Crafting gems bot", "description": "Farming gold by mining and banking litium ores", "location": "Dwarven mines"},
-    {"name": "smelting steel", "description": "Farming gold by mining and banking litium ores", "location": "Dwarven mines"}
-]
+    Object.entries(categories).forEach(([key, value]) => {
+        console.log("- " + key)
+     });
+}
 
-function displayMenu() {
+function displayMenu(bots) {
     console.log("========= Bots menu =========")
 
     for(let i = 0; i < bots.length; i++) {
-        console.log((i+1) + ": " + bots[i].name)
+        console.log((i+1) + ": " + bots[i])
     }
     console.log("0: quit")
 }
 
-async function menu() {
-
-}
 
 async function main() {
-    displayMenu()
-    let {bot} = await prompt.get(["bot"])
+    let categories = {"other": [], "mining": [], "combat": []}
+    const avBots = await readAvailableBots("./misc/")
     
-    switch(bot) {
-        case "1":
-            console.log("Starting litium bot")
-            litiumBot.startMiningLitium()
+    for (let i = 0; i < avBots.length; i++) {
+        switch(avBots[i].split("_").slice(-1)[0].replace(".json","")) {
+            case "bot":
+                categories.other.push(avBots[i])
+                break;
+            case "mining":
+                categories.mining.push(avBots[i])
+                break;
+            case "combat":
+                categories.combat.push(avBots[i])
+            default:
+                console.log("No bots were found!")
+        }
+    }
+
+    // Category
+    displayCategories(categories);
+    const categoryInput = await prompt.get(['category']);
+    console.log(categoryInput.category);
+
+    // Bots
+    switch(categoryInput.category) {
+        case "other":
+            displayMenu(categories.other)
             break;
-        case "2":
-            console.log("Starting crafting bot")
-            botter.startBot()
+        case "mining":
+            displayMenu(categories.mining)
             break;
-        case "3":
-            console.log("Starting smelting bot")
-            botter.startBot("smelting_cannonballs.json")
-        case "0":
-            console.log("Exiting...")
-            break;
-        default:
-            console.log("TEST")
+        case "combat":
+            displayMenu(categories.combat)
             break;
     }
-    
+
+    const botInput = await prompt.get(['bot'])
+    console.log(botInput.bot)
+    if(botInput.bot <= avBots.length) {
+        bot.startBot(avBots[botInput.bot -1])
+    }
 }
 
 main()

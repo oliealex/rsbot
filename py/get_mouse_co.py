@@ -2,47 +2,93 @@ import sys
 import json
 import time
 
-from pynput.mouse import Listener
+from os import path
+from pynput.mouse import Listener as MouseListener
+from pynput.keyboard import Listener as KeyboardListener
 
 clickStart = 0
 nextClick = 0
 
 PATH = "./misc/"
-TMP = "coordinates_template.json"
-bot_name = sys.argv[1]
-output = "{}.json".format(bot_name)
-data = {}
+data = []
 
+# Read input arg
+if len(sys.argv) > 1:
+    bot_name = sys.argv[1]
+    output = "{}.json".format(bot_name)
+else:
+    bot_name = ""
 
-f = open(("").join(PATH + TMP))
-data = json.load(f)
-data['bot'] = bot_name
-f.close()
+def appendNewData(filename):
+    
+    # Read JSON file
+    with open(filename) as fp:
+        listObj = json.load(fp)
+ 
+    # Verify existing list
+    print(listObj)
+    print(type(listObj))
+    
+
+    ## Verify updated list
+    print(listObj)
+
+     
+    #with open(filename, 'w') as json_file:
+    #    json.dump(listObj, json_file, 
+    #                    indent=4,  
+    #                    separators=(',',': '))
+ 
+    print('Successfully appended to the JSON file')
 
 def on_click(x, y, button, pressed):
     global clickStart
     global nextClick
-    
-    if pressed and str(button) != "Button.middle":
+    button = str(button)
+
+    if pressed and button != "Button.middle":
         nextClick = time.time() - clickStart
         clickStart = time.time()
 
+        if button == "Button.left":
+            button = ""
+        else:
+            button = button.split('.')[-1]
+
         print("X: {}, Y: {}, button: {}".format(x,y,button))
-        data["mouseMovements"].append({
+        data.append({
             "x": x,
             "y": y,
-            "button": str(button),
+            "mouseButton": button,
+            "button": "",
             "waitTime": 0 if nextClick > 500 else str(round(nextClick,1))
         })
+    
+    if button == "Button.middle":
+        return False
 
-    if str(button) == "Button.middle":
-        print("Stopped recording")
-        return False        
+#def on_press(key):
+#    global clickStart
+#    global nextClick
+#    keyPressed = str(key).split('.')[-1]
+#    nextClick = time.time() - clickStart
+#    clickStart = time.time()
+#    
+#    print("KEY: " + keyPressed.replace("'",""))
+#    data.append({
+#        "x": 0,
+#        "y": 0,
+#        "mouseButton": "",
+#        "button": keyPressed.replace("'",""),
+#        "waitTime": 0 if nextClick > 500 else str(round(nextClick,1))
+#    })
+#
+#    if(keyPressed == "esc"):
+#        return False
 
 def startListener():
-    with Listener(on_click=on_click) as listener:
+    with MouseListener(on_click=on_click) as listener:
         listener.join()
-
 
 
 def main():
@@ -55,8 +101,15 @@ def main():
     print("\n###### Data Collected #######\n")
     print(data)
 
-    with open(PATH + output, 'w') as outfile:
-        json.dump(data, outfile)
+    # Check if file exists
+    if path.isfile(PATH+output) is False:
+        results = {"movement": []}
+        results["movement"].append(data)
+        with open(PATH + output, 'w') as outfile:
+            json.dump(results,outfile)
+    else:
+        if len(sys.argv) > 0:
+            appendNewData(output)
 
 
 if __name__ == "__main__":
